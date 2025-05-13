@@ -14,6 +14,7 @@ image_files = [f for f in os.listdir(image_folder) if f.endswith('.jpg')]
 
 for episode, image_file in enumerate(image_files):
     # 采集图像
+    print(f"当前读取图片: {image_file}")  # 打印当前图片文件名
     frame = cv2.imread(os.path.join(image_folder, image_file))
     frame = cv2.resize(frame, (200, 100))  # 调整尺寸
     state = torch.tensor(frame.transpose(2, 0, 1), dtype=torch.float32).unsqueeze(0)
