@@ -1,0 +1,13 @@
+# 忽略TensorBoard日志
+runs/
+
+# 忽略模型权重文件（如不想上传模型参数）
+# model.pth
+
+# Python缓存
+__pycache__/
+*.pyc
+
+# OpenCV等临时文件
+*.jpg
+*.png
