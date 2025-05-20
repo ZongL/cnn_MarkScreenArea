@@ -27,22 +27,27 @@ class ScreenActionNet(nn.Module):
         x = x.view(x.size(0), -1)
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
-        return F.softmax(x, dim=1)
+        return x  # 直接输出logits，不加softmax
 
 class ReinforcementLearningAgent:
     def __init__(self, model, lr=0.001):
         self.model = model
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
+        self.criterion = nn.CrossEntropyLoss()  # 使用交叉熵损失
 
     def predict(self, state):
         with torch.no_grad():
-            return self.model(state).numpy()
+            logits = self.model(state)
+            probs = F.softmax(logits, dim=1)
+            return probs.numpy()
 
     def update(self, state, action, reward):
-        # 计算损失
-        action_prob = self.model(state)[0, action]
-        loss = -torch.log(action_prob) * reward
-        # 反向传播
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
+        # 只在reward为正时训练，reward为负时跳过
+        if reward > 0:
+            logits = self.model(state)
+            target = torch.tensor([action], dtype=torch.long)
+            loss = self.criterion(logits, target)
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+        # reward为负时不做任何更新
